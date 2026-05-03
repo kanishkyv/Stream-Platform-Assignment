@@ -1,0 +1,138 @@
+{
+  "info": {
+    "_postman_id": "7f61b7b3-6f8a-4a0f-a8c8-2cc6c6b6c6e6",
+    "name": "assignment1 - streaming backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "POST /user/signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"name\": \"{{name}}\",\n  \"deviceToken\": \"{{deviceToken}}\"\n}\n",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/signup",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "user", "signup" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Purchase",
+      "item": [
+        {
+          "name": "POST /purchase/complete (new key)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.environment.get('idempotencyKey') || pm.environment.get('idempotencyKey').trim() === '') {",
+                  "  pm.environment.set('idempotencyKey', pm.variables.replaceIn('{{$guid}}'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"planId\": \"{{planId}}\",\n  \"amount\": {{amount}},\n  \"email\": \"{{email}}\",\n  \"deviceToken\": \"{{deviceToken}}\"\n}\n",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/purchase/complete",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "purchase", "complete" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /purchase/complete (same key replay)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"planId\": \"{{planId}}\",\n  \"amount\": {{amount}},\n  \"email\": \"{{email}}\",\n  \"deviceToken\": \"{{deviceToken}}\"\n}\n",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/purchase/complete",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "purchase", "complete" ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Watch",
+      "item": [
+        {
+          "name": "POST /watch/event (progress)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"contentId\": \"{{contentId}}\",\n  \"watchedSeconds\": 12,\n  \"sessionId\": \"{{sessionId}}\",\n  \"eventType\": \"progress\"\n}\n",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/watch/event",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "watch", "event" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /watch/event (pause -> immediate flush)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"contentId\": \"{{contentId}}\",\n  \"watchedSeconds\": 120,\n  \"sessionId\": \"{{sessionId}}\",\n  \"eventType\": \"pause\"\n}\n",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/watch/event",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "watch", "event" ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
